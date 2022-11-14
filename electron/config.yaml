@@ -1,0 +1,10 @@
+repository:
+  name: repo
+  classes:
+    - kaoyan
+user:
+  - name: yyy
+    password: "123321"
+    classes:
+      - absorb
+    counter: 0
