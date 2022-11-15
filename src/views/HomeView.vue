@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { inject,  ref,  computed } from "vue";
+// import cinnamoroll35 from '../assets/cinnamoroll-35.gif'
+const cinnamoroll35 = new URL("../assets/cinnamoroll-35.gif", import.meta.url).href;
 import type { Ref } from "vue";
-import { Close, FullScreen, Aim, Search, Upload, Download, Delete } from "@element-plus/icons-vue";
-import {ipcRenderer} from 'electron'
+import { computed, inject, ref } from "vue";
+import { Aim, Close, Delete, Download, FullScreen, Search } from "@element-plus/icons-vue";
+import { ipcRenderer } from "electron";
 import SearchDialog from "@/components/SearchDialog.vue";
 import type { Word } from "@/interface/typings";
 import ShowMeansPop from "@/components/ShowMeansPop.vue";
@@ -12,154 +14,165 @@ import router from "@/router";
 import { storeToRefs } from "pinia";
 import { ElMessageBox } from "element-plus";
 import { configCounterStore } from "@/stores/counter";
+
 // 设置body背景为透明
 let _body = document.getElementById("first_body");
-if (_body)
-  _body.style.backgroundColor = '#FFFFFF00'
-const appDiv = document.getElementById("app")
+if (_body) _body.style.backgroundColor = "#FFFFFF00";
+const appDiv = document.getElementById("app");
 if (appDiv) {
-  appDiv.style.padding = '0'
+  appDiv.style.padding = "0";
 }
 // 搜索组件
-const searchDialogRef:Ref<SearchDialog> = ref<InstanceType<typeof SearchDialog> | null>(null)
+const searchDialogRef = ref<InstanceType<typeof SearchDialog> | null>(null);
 // mongoDB的model和连接用于管理
-const mongoose:any = inject("mongoose")
-const wordStore = wordsStore()
-const {wordsList, toLearnWord, collectionList} = storeToRefs(wordStore)
-const words:Ref<Word[]> = ref([])
+const mongoose: any = inject("mongoose");
+const wordStore = wordsStore();
+const { wordsList, toLearnWord, collectionList } = storeToRefs(wordStore);
+const words: Ref<Word[]> = ref([]);
 // 收藏列表，便于搜词时查找
 const wordList = computed(() => {
-  let i:string[] = []
-  collectionList.value.forEach(w => {i.push(w.word)})
+  let i: string[] = [];
+  collectionList.value.forEach((w) => {
+    i.push(w.word);
+  });
   return i;
 });
+
 // 关闭应用
 function closeWindow() {
   //  在这里添加是否要退出的确认
-  ElMessageBox.confirm('确认要退出吗？', '警告', {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm("确认要退出吗？", "警告", {
+    confirmButtonText: "确认",
+    cancelButtonText: "取消",
     type: "warning"
-  }).then(value => {
-    if (value == 'confirm') {
-      if (mongoose)
-        mongoose.disconnect()
-      ipcRenderer.send("close-window")
-    }
-  }).catch(reason => {
-    if (reason == 'cancel')
-      return;
   })
+    .then((value) => {
+      if (value == "confirm") {
+        if (mongoose) mongoose.disconnect();
+        ipcRenderer.send("close-window");
+      }
+    })
+    .catch((reason) => {
+      if (reason == "cancel") return;
+    });
 }
 //  全屏
 function fullScreenFuc() {
-  ipcRenderer.send("panel-show")
+  ipcRenderer.send("panel-show");
   downloadData();
-  router.push("panel")
+  router.push("/panel");
 }
+
 // 移动窗口
 function moveWindowTo(event: DragEvent) {
-  ipcRenderer.send("move-window", event.offsetX, event.offsetY)
+  ipcRenderer.send("move-window", event.offsetX, event.offsetY);
 }
+
 // 搜索窗口
-const isShown:Ref<boolean> = ref(false)
-function searchWordOpen():void {
-  isShown.value = true
+const isShown: Ref<boolean> = ref(false);
+
+function searchWordOpen(): void {
+  isShown.value = true;
 }
+
 // 从云端拉取数据
-const tempStore = tempMongooseStore()
-const { config } = configCounterStore()
+const tempStore = tempMongooseStore();
+const { config } = configCounterStore();
+
 function downloadData() {
   // 循环的单词列表
   // 获取依赖注入的Model
-  const collectionModel = mongooseCollectionStore()
-  const defaultModel = mongooseDefaultStore()
-  defaultModel.defaultModel.model.find({},
-   null, null,
-    (error, docs) => {
-      if (error) console.log(error);
-      else {
-        let name = defaultModel.defaultModel.model.modelName;
-        let newDocs:Word[] = [];
-        docs.forEach(value => {newDocs.push({
+  const collectionModel = mongooseCollectionStore();
+  const defaultModel = mongooseDefaultStore();
+  defaultModel.defaultModel.model.find({}, null, null, (error, docs) => {
+    if (error) console.log(error);
+    else {
+      let name = defaultModel.defaultModel.model.modelName;
+      let newDocs: Word[] = [];
+      docs.forEach((value) => {
+        newDocs.push({
           word: value.word,
           soundUrl: value.soundUrl,
           means: value.means,
           sound: value.sound
-        })})
-        wordStore.setWoldList(name, newDocs)
-        toLearnWord.value = wordStore.wordsList[name].slice(0, 9)
-      }
-    })
-  collectionModel.defaultModel.model.find({},null,  null, (error, docs) => {
+        });
+      });
+      wordStore.setWoldList(name, newDocs);
+      toLearnWord.value = wordStore.wordsList[name].slice(0, 9);
+    }
+  });
+  collectionModel.defaultModel.model.find({}, null, null, (error, docs) => {
     if (error) console.log(error);
     else {
-      let temp:Word[] = docs;
-      let realWord:Word[] = [];
-      temp.forEach(value => {
+      let temp: Word[] = docs;
+      let realWord: Word[] = [];
+      temp.forEach((value) => {
         realWord.push({
           word: value.word,
           means: value.means,
           soundUrl: value.soundUrl,
           sound: value.sound
-        })
-      })
-      wordStore.setCollectionList(realWord)
+        });
+      });
+      wordStore.setCollectionList(realWord);
     }
-  })
+  });
 
-  config.user?.forEach(conf => {
-    conf.classes.forEach(clz => {
+  config.user?.forEach((conf) => {
+    conf.classes.forEach((clz) => {
       tempStore.init(conf.name, clz);
       tempStore.mongoose.model.find({}, (error, docs) => {
-        if (error)
-          console.log(error);
+        if (error) console.log(error);
         else {
-          let temp:Word[] = docs;
-          let realWord:Word[] = [];
-          temp.forEach(value => {
+          let temp: Word[] = docs;
+          let realWord: Word[] = [];
+          temp.forEach((value) => {
             realWord.push({
               word: value.word,
               means: value.means,
               soundUrl: value.soundUrl,
               sound: value.sound
-            })
-          })
-          wordStore.setWoldList(clz, realWord)
+            });
+          });
+          wordStore.setWoldList(clz, realWord);
         }
-      })
-    })
-  })
+      });
+    });
+  });
 }
 // 取消一个单词的观看
 function unWatchWord(w: Word) {
-  let i:number | undefined = words.value?.indexOf(w)
-  if (i != -1 && i != undefined)
-    words.value?.splice(i, 1);
+  let i: number | undefined = words.value?.indexOf(w);
+  if (i != -1 && i != undefined) words.value?.splice(i, 1);
 }
 </script>
 
 <template>
-  <search-dialog v-model="isShown" :words="words" :wordList="wordList"
-                 :collectionList="collectionList"  ref="searchDialogRef">
-    <template #title>
-    </template>
+  <search-dialog
+    ref="searchDialogRef"
+    v-model="isShown"
+    :collectionList="collectionList"
+    :wordList="wordList"
+    :words="words"
+  >
+    <template #title></template>
   </search-dialog>
   <div class="flex-container">
     <div class="right-top-container">
-      <el-button class="icon-style" :icon="Close"
-                 circle :bg="true" @click="closeWindow">
+      <el-button
+        :bg="true"
+        :icon="Close"
+        circle
+        class="icon-style"
+        @click="closeWindow"
+      >
       </el-button>
     </div>
     <div class="center-container">
       <el-carousel trigger="hover" :interval="5000" type="card" height="248px">
         <el-carousel-item v-if="toLearnWord.length === 0">
-          <h1 class="words-style2">
-            还没有单词
-          </h1>
-          <h1 class="words-style2">
-            快来添加吧！
-          </h1>
+          <h1 class="words-style2">还没有单词</h1>
+          <h1 class="words-style2">快来添加吧！</h1>
         </el-carousel-item>
         <el-carousel-item v-for="w in toLearnWord">
           <el-button :icon="Delete" circle size="large" @click="unWatchWord(w)">
@@ -171,13 +184,16 @@ function unWatchWord(w: Word) {
           <div style="text-align: center">
             <show-means-pop :ellipsis="false" :explains="w.means" />
           </div>
-          <el-button link @click="searchDialogRef.playVideo(w.soundUrl)"
-                     style="color: var(--el-color-primary)">
+          <el-button
+            link
+            style="color: var(--el-color-primary)"
+            @click="searchDialogRef?.playVideo(w.soundUrl)"
+          >
             [{{ w.sound }}]
           </el-button>
           <div v-show="w.show">
             <el-row v-for="mean in w.means">
-              <h3 style="text-align: center;width: 100%">{{ mean }}</h3>
+              <h3 style="text-align: center; width: 100%">{{ mean }}</h3>
             </el-row>
           </div>
         </el-carousel-item>
@@ -187,35 +203,53 @@ function unWatchWord(w: Word) {
       <el-affix :offset="8" target=".left-bottom-container">
         <el-row :gutter="7">
           <el-col :span="6">
-            <el-button class="icon-style" :icon="FullScreen"
-                       circle :bg="true" @click="fullScreenFuc">
+            <el-button
+              :bg="true"
+              :icon="FullScreen"
+              circle
+              class="icon-style"
+              @click="fullScreenFuc"
+            >
             </el-button>
           </el-col>
           <el-col :span="6">
             <div draggable="true" @dragend="moveWindowTo">
-              <el-button class="icon-style" :icon="Aim"
-                         circle :bg="true" @click="fullScreenFuc">
+              <el-button
+                :bg="true"
+                :icon="Aim"
+                circle
+                class="icon-style"
+                @click="fullScreenFuc"
+              >
               </el-button>
             </div>
           </el-col>
           <el-col :span="6">
-            <el-button class="icon-style" :icon="Search" circle
-                       :bg="true" @click="searchWordOpen" />
+            <el-button
+              :bg="true"
+              :icon="Search"
+              circle
+              class="icon-style"
+              @click="searchWordOpen"
+            />
           </el-col>
           <el-col :span="6">
-            <el-button class="icon-style" :icon="Download" circle
-                       :bg="true" @click="downloadData" />
+            <el-button
+              :bg="true"
+              :icon="Download"
+              circle
+              class="icon-style"
+              @click="downloadData"
+            />
           </el-col>
         </el-row>
       </el-affix>
     </div>
   </div>
-  <img class= "top-left-img"
-       src="src/assets/cinnamoroll-35.gif">
+  <img class="top-left-img" src="../assets/cinnamoroll-35.gif" />
 </template>
 
 <style scoped>
-
 :root {
   --cartoon-bg-opacity: 30%;
 }
@@ -284,8 +318,6 @@ function unWatchWord(w: Word) {
   background: #d3dce6;
 }
 
-
-
 /*.el-carousel__item:nth-child(3n)::after {*/
 /*  position: absolute;*/
 /*  top: 0;*/
@@ -330,7 +362,6 @@ function unWatchWord(w: Word) {
 /*  right: 0;*/
 /*  opacity: var(--cartoon-bg-opacity);*/
 /*}*/
-
 
 .right-top-container {
   text-align: center;
@@ -381,5 +412,4 @@ function unWatchWord(w: Word) {
   height: 100%;
   padding: 1rem;
 }
-
 </style>

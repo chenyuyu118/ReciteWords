@@ -1,0 +1,4 @@
+repository:
+  name: repo
+  classes:
+    - kaoyan
