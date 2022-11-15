@@ -2,7 +2,7 @@
   <el-popover trigger="click" width="60%">
     <template #default>
       <el-scrollbar max-height="200px">
-        <p v-for="item in explains">{{item}}</p>
+        <p v-for="item in explains">{{ item }}</p>
       </el-scrollbar>
     </template>
     <template #reference>
@@ -20,9 +20,7 @@
 </template>
 
 <script setup lang="ts">
-  defineProps<{explains: string[], ellipsis: boolean}>()
+defineProps<{ explains: string[]; ellipsis: boolean }>();
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

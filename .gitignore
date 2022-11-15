@@ -28,3 +28,8 @@ coverage
 *.sw?
 
 out/
+#Electron-builder output
+/dist_electron
+
+# 构建安装包的输出
+release/
